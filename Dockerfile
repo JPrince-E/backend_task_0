@@ -1,17 +1,22 @@
-#
-# Build stage
-#
-FROM maven:3.8.2-jdk-11 AS build
-COPY . .
-#RUN mvn clean package -DskipTests
-RUN mvn clean
-RUN mvn install
+# Build Stage
+FROM maven:3.8.6-openjdk-17 AS build
+WORKDIR /app
 
-#
-# Package stage
-#
+# Copy project files
+COPY . .
+
+# Build the application
+RUN mvn clean install -DskipTests
+
+# Package Stage
 FROM openjdk:17-jdk-slim
-COPY --from=build /target/*.jar backend_task_0.jar
-# ENV PORT=8080
+WORKDIR /app
+
+# Copy the JAR from the build stage
+COPY --from=build /app/target/*.jar backend_task_0.jar
+
+# Expose the application port
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","breej.jar"]
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "backend_task_0.jar"]
